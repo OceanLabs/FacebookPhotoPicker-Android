@@ -43,6 +43,10 @@ package ly.kite.facebookphotopicker;
 ///// Class Declaration /////
 
 import android.app.Fragment;
+import android.content.Intent;
+import android.os.Parcelable;
+
+import ly.kite.photopicker.common.Photo;
 
 /*****************************************************
  *
@@ -55,7 +59,9 @@ public class FacebookPhotoPicker
   ////////// Static Constant(s) //////////
 
   @SuppressWarnings( "unused" )
-  private static final String  LOG_TAG = "FacebookPhotoPicker";
+  static private final String  LOG_TAG = "FacebookPhotoPicker";
+
+  static public  final String  EXTRA_SELECTED_PHOTOS = "ly.kite.facebookphotopicker.EXTRA_SELECTED_PHOTOS";
 
 
   ////////// Static Variable(s) //////////
@@ -77,6 +83,23 @@ public class FacebookPhotoPicker
   static public void startPhotoPickerForResult( Fragment fragment, int activityRequestCode )
     {
     FacebookPhotoPickerActivity.startForResult( fragment, activityRequestCode );
+    }
+
+
+  /*****************************************************
+   *
+   * Returns an array of picked photos.
+   *
+   *****************************************************/
+  static public Photo[] getResultPhotos( Intent data )
+    {
+    Parcelable[] photos = data.getParcelableArrayExtra( FacebookPhotoPicker.EXTRA_SELECTED_PHOTOS );
+
+    Photo[] facebookPhotos = new Photo[ photos.length ];
+
+    System.arraycopy( photos, 0, facebookPhotos, 0, photos.length );
+
+    return ( facebookPhotos );
     }
 
 

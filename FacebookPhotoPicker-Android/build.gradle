@@ -27,6 +27,8 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.facebook.android:facebook-android-sdk:4.7.0'
+    compile 'in.srain.cube:grid-view-with-header-footer:1.0.12'
+    compile 'com.squareup.picasso:picasso:2.5.2'
 }
 
 repositories {
