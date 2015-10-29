@@ -39,33 +39,13 @@ package ly.kite.facebookphotopicker;
 
 ///// Import(s) /////
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.GridView;
-
-import com.facebook.AccessToken;
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.FacebookRequestError;
-import com.facebook.FacebookSdk;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.HttpMethod;
-import com.facebook.login.LoginManager;
-import com.facebook.login.LoginResult;
 
 import ly.kite.photopicker.common.GridCheckController;
 import ly.kite.photopicker.common.PagingBaseAdaptor;
@@ -81,27 +61,12 @@ import ly.kite.photopicker.common.PhotoAdaptor;
  * This activity is the Facebook photo picker.
  *
  *****************************************************/
-public class FacebookPhotoPickerActivity extends Activity implements PagingGridView.Pagingable, GridCheckController.IListener
+public class FacebookPhotoPickerActivity extends Activity implements FacebookAgent.IPhotosCallback, PagingGridView.Pagingable, GridCheckController.IListener
   {
   ////////// Static Constant(s) //////////
 
   @SuppressWarnings( "unused" )
   static private final String  LOG_TAG                = "FacebookPhotoPickerA...";
-
-  static private final String  PERMISSION_USER_PHOTOS = "user_photos";
-
-  static private final String  GRAPH_PATH_MY_PHOTOS   = "/me/photos";
-
-  static private final String  PARAMETER_NAME_TYPE    = "type";
-  static private final String  PARAMETER_VALUE_TYPE   = "uploaded";
-
-  static private final String  PARAMETER_NAME_FIELDS  = "fields";
-  static private final String  PARAMETER_VALUE_FIELDS = "id,link,picture";
-
-  static private final String  JSON_NAME_DATA         = "data";
-  static private final String  JSON_NAME_ID           = "id";
-  static private final String  JSON_NAME_LINK         = "link";
-  static private final String  JSON_NAME_PICTURE      = "picture";
 
 
   ////////// Static Variable(s) //////////
@@ -109,15 +74,11 @@ public class FacebookPhotoPickerActivity extends Activity implements PagingGridV
 
   ////////// Member Variable(s) //////////
 
-  private CallbackManager          mCallbackManager;
-
-  private boolean                  mDisplayGalleryOnNewAccessToken;
+  private FacebookAgent            mFacebookAgent;
 
   private PagingGridView           mPagingGridView;
   private PagingBaseAdaptor        mPagingBaseAdaptor;
-  private GridCheckController mMultiChoiceModeListener;
-
-  private GraphRequest             mNextPageGraphRequest;
+  private GridCheckController      mMultiChoiceModeListener;
 
 
   ////////// Static Initialiser(s) //////////
@@ -138,30 +99,6 @@ public class FacebookPhotoPickerActivity extends Activity implements PagingGridV
     }
 
 
-  /*****************************************************
-   *
-   * Returns a string representation of an access token.
-   *
-   *****************************************************/
-  static private String stringFrom( AccessToken accessToken )
-    {
-    if ( accessToken == null ) return ( "<null>" );
-
-    StringBuilder stringBuilder = new StringBuilder();
-
-    stringBuilder.append( "Token          : " ).append( accessToken.getToken()         ).append( ( '\n' ) );
-    stringBuilder.append( "Application Id : " ).append( accessToken.getApplicationId() ).append( ( '\n' ) );
-    stringBuilder.append( "Expires        : " ).append( accessToken.getExpires()       ).append( ( '\n' ) );
-    stringBuilder.append( "Last Refresh   : " ).append( accessToken.getLastRefresh()   ).append( ( '\n' ) );
-    stringBuilder.append( "Source         : " ).append( accessToken.getSource()        ).append( ( '\n' ) );
-    stringBuilder.append( "Permissions    : " ).append( accessToken.getPermissions()   ).append( ( '\n' ) );
-    stringBuilder.append( "User Id        : " ).append( accessToken.getUserId()        ).append( ( '\n' ) );
-
-    return ( stringBuilder.toString() );
-    }
-
-
-
   ////////// Constructor(s) //////////
 
 
@@ -178,12 +115,11 @@ public class FacebookPhotoPickerActivity extends Activity implements PagingGridV
     super.onCreate( savedInstanceState );
 
 
-    // Initialise the Facebook SDK
+    // Get the Facebook agent
+    mFacebookAgent = FacebookAgent.getInstance( this );
 
-    FacebookSdk.sdkInitialize( getApplicationContext() );
 
-    mCallbackManager = CallbackManager.Factory.create();
-
+    // Set up the screen
 
     setContentView( R.layout.screen_photo_picker );
 
@@ -197,7 +133,7 @@ public class FacebookPhotoPickerActivity extends Activity implements PagingGridV
     mPagingGridView.setChoiceMode( GridView.CHOICE_MODE_MULTIPLE_MODAL );
     mPagingGridView.setPagingableListener( FacebookPhotoPickerActivity.this );
 
-    mMultiChoiceModeListener = new GridCheckController( FacebookPhotoPickerActivity.this, mPagingGridView, FacebookPhotoPickerActivity.this );
+    mMultiChoiceModeListener = new GridCheckController( this, mPagingGridView, FacebookPhotoPickerActivity.this );
 
 
     displayGallery();
@@ -214,7 +150,45 @@ public class FacebookPhotoPickerActivity extends Activity implements PagingGridV
     {
     super.onActivityResult( requestCode, resultCode, data );
 
-    if ( mCallbackManager != null ) mCallbackManager.onActivityResult( requestCode, resultCode, data );
+    mFacebookAgent.onActivityResult( requestCode, resultCode, data );
+    }
+
+
+  ////////// FacebookAgent.PhotosCallback Method(s) //////////
+
+  /*****************************************************
+   *
+   * Called when photos were successfully retrieved.
+   *
+   *****************************************************/
+  @Override
+  public void facOnPhotosSuccess( List<Photo> photoList, boolean morePhotos )
+    {
+    mPagingGridView.onFinishLoading( morePhotos, photoList );
+    }
+
+
+  /*****************************************************
+   *
+   * Called when there was an error retrieving photos.
+   *
+   *****************************************************/
+  @Override
+  public void facOnError( Exception exception )
+    {
+    // TODO: Display error dialog
+    }
+
+
+  /*****************************************************
+   *
+   * Called when photo retrieval was cancelled.
+   *
+   *****************************************************/
+  @Override
+  public void facOnCancel()
+    {
+    finish();
     }
 
 
@@ -228,14 +202,7 @@ public class FacebookPhotoPickerActivity extends Activity implements PagingGridV
   @Override
   public void onLoadMoreItems()
     {
-    if ( mNextPageGraphRequest != null )
-      {
-      mNextPageGraphRequest.setCallback( new GraphRequestCallback() );
-
-      mNextPageGraphRequest.executeAsync();
-
-      mNextPageGraphRequest = null;
-      }
+    mFacebookAgent.getPhotos( this );
     }
 
 
@@ -270,241 +237,11 @@ public class FacebookPhotoPickerActivity extends Activity implements PagingGridV
    *****************************************************/
   private void displayGallery()
     {
-    // If we don't have an access token - make a log-in request.
-
-    AccessToken accessToken = AccessToken.getCurrentAccessToken();
-
-    if ( accessToken == null || accessToken.getUserId() == null )
-      {
-      LoginManager loginManager = LoginManager.getInstance();
-
-      loginManager.registerCallback( mCallbackManager, new LoginResultCallback() );
-
-      mDisplayGalleryOnNewAccessToken = true;
-
-      loginManager.logInWithReadPermissions( this, Arrays.asList( PERMISSION_USER_PHOTOS ) );
-
-      return;
-      }
-
-    Log.d( LOG_TAG, "Current access token = " + accessToken.getToken() );
-
-
-    // If the access token has expired - refresh it
-
-    if ( accessToken.isExpired() )
-      {
-      Log.i( LOG_TAG, "Access token has expired - refreshing" );
-
-      mDisplayGalleryOnNewAccessToken = true;
-
-      AccessToken.refreshCurrentAccessTokenAsync();
-
-      return;
-      }
-
-
-    // Create and execute a graph request for the user's photos
-
-    Bundle parameters = new Bundle();
-
-    parameters.putString( PARAMETER_NAME_TYPE,   PARAMETER_VALUE_TYPE );
-    parameters.putString( PARAMETER_NAME_FIELDS, PARAMETER_VALUE_FIELDS );
-
-    GraphRequest request = new GraphRequest(
-            AccessToken.getCurrentAccessToken(),
-            GRAPH_PATH_MY_PHOTOS,
-            parameters,
-            HttpMethod.GET,
-            new GraphRequestCallback());
-
-    request.executeAsync();
-    }
-
-
-  /*****************************************************
-   *
-   * Processes a new access token.
-   *
-   *****************************************************/
-  private void newAccessToken( AccessToken accessToken )
-    {
-    Log.d( LOG_TAG, "newAcceessToken( accessToken ):\n" + stringFrom( accessToken ) );
-
-    if ( mDisplayGalleryOnNewAccessToken )
-      {
-      mDisplayGalleryOnNewAccessToken = false;
-
-      displayGallery();
-      }
+    mFacebookAgent.getPhotos( this );
     }
 
 
   ////////// Inner Class(es) //////////
-
-  /*****************************************************
-   *
-   * A login result callback.
-   *
-   *****************************************************/
-  private class LoginResultCallback implements FacebookCallback<LoginResult>
-    {
-
-    /*****************************************************
-     *
-     * Called when login succeeds.
-     *
-     *****************************************************/
-    @Override
-    public void onSuccess( LoginResult loginResult )
-      {
-      Log.d( LOG_TAG, "onSuccess( loginResult = " + loginResult.toString() + " )" );
-
-      newAccessToken( loginResult.getAccessToken() );
-      }
-
-
-    /*****************************************************
-     *
-     * Called when login is cancelled.
-     *
-     *****************************************************/
-    @Override
-    public void onCancel()
-      {
-      Log.d( LOG_TAG, "onCancel()" );
-
-      AccessToken.setCurrentAccessToken( null );
-
-      finish();
-      }
-
-
-    /*****************************************************
-     *
-     * Called when login fails with an error.
-     *
-     *****************************************************/
-    @Override
-    public void onError( FacebookException facebookException )
-      {
-      Log.d( LOG_TAG, "onError( facebookException = " + facebookException + ")", facebookException );
-
-      // TODO: Display error dialog
-      }
-    }
-
-
-  /*****************************************************
-   *
-   * A graph request callback.
-   *
-   *****************************************************/
-  private class GraphRequestCallback implements GraphRequest.Callback
-    {
-    @Override
-    public void onCompleted( GraphResponse graphResponse )
-      {
-      Log.d( LOG_TAG, "Graph response: " + graphResponse );
-
-
-      // Check for error
-
-      FacebookRequestError error = graphResponse.getError();
-
-      if ( error != null )
-        {
-        Log.e( LOG_TAG, "Received Facebook server error: " + error.toString() );
-
-        switch ( error.getCategory() )
-          {
-          case LOGIN_RECOVERABLE:
-
-            Log.e( LOG_TAG, "Attempting to resolve LOGIN_RECOVERABLE error" );
-
-            mDisplayGalleryOnNewAccessToken = true;
-
-            LoginManager.getInstance().resolveError( FacebookPhotoPickerActivity.this, graphResponse );
-
-            return;
-
-          case TRANSIENT:
-
-            displayGallery();
-
-            return;
-
-          case OTHER:
-
-            return;
-          }
-
-        // TODO: Display error dialog
-
-        return;
-        }
-
-
-      // Check for data
-
-      JSONObject responseJSONObject = graphResponse.getJSONObject();
-
-      if ( responseJSONObject != null )
-        {
-        Log.d( LOG_TAG, "Response object: " + responseJSONObject.toString() );
-
-        JSONArray dataJSONArray = responseJSONObject.optJSONArray( JSON_NAME_DATA );
-
-        if ( dataJSONArray != null )
-          {
-          ArrayList<Photo> photoArrayList = new ArrayList<>( dataJSONArray.length() );
-
-          for ( int photoIndex = 0; photoIndex < dataJSONArray.length(); photoIndex ++ )
-            {
-            try
-              {
-              JSONObject photoJSONObject = dataJSONArray.getJSONObject( photoIndex );
-
-              String id      = photoJSONObject.getString( JSON_NAME_ID );
-              String link    = photoJSONObject.getString( JSON_NAME_LINK );
-              String picture = photoJSONObject.getString( JSON_NAME_PICTURE );
-
-              Log.d( LOG_TAG, "-- Photo --" );
-              Log.d( LOG_TAG, "Id      : " + id );
-              Log.d( LOG_TAG, "Link    : " + link );
-              Log.d( LOG_TAG, "Picture : " + picture );
-
-              Photo photo = new Photo( new URL( picture), new URL( link ) );
-
-              photoArrayList.add( photo );
-              }
-            catch ( JSONException je )
-              {
-              Log.e( LOG_TAG, "Unable to extract photo data from JSON: " + responseJSONObject.toString(), je );
-              }
-            catch ( MalformedURLException mue )
-              {
-              Log.e( LOG_TAG, "Invalid URL in JSON: " + responseJSONObject.toString(), mue );
-              }
-            }
-
-          mNextPageGraphRequest = graphResponse.getRequestForPagedResults( GraphResponse.PagingDirection.NEXT );
-
-          mPagingGridView.onFinishLoading( mNextPageGraphRequest != null, photoArrayList );
-          }
-        else
-          {
-          Log.e( LOG_TAG, "No data found in JSON response: " + responseJSONObject );
-          }
-        }
-      else
-        {
-        Log.e( LOG_TAG, "No JSON found in graph response" );
-        }
-
-      }
-    }
-
 
 
   }
