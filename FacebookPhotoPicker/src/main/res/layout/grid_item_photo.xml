@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ly.kite.instagramphotopicker.SquareImageView
+    <ly.kite.photopicker.common.SquareImageView
         android:id="@+id/imageview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
