@@ -45,6 +45,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.GridView;
 
 import ly.kite.photopicker.common.GridCheckController;
@@ -151,6 +152,35 @@ public class FacebookPhotoPickerActivity extends Activity implements FacebookAge
     super.onActivityResult( requestCode, resultCode, data );
 
     mFacebookAgent.onActivityResult( requestCode, resultCode, data );
+    }
+
+
+  /*****************************************************
+   *
+   * Called when an item in the options menu is selected.
+   *
+   *****************************************************/
+  @Override
+  public boolean onOptionsItemSelected( MenuItem item )
+    {
+    // See what menu item was selected
+
+    int itemId = item.getItemId();
+
+    if ( itemId == android.R.id.home )
+      {
+      ///// Home /////
+
+      // We intercept the home button and do the same as if the
+      // back key had been pressed.
+
+      super.onBackPressed();
+
+      return ( true );
+      }
+
+
+    return ( super.onOptionsItemSelected( item ) );
     }
 
 
