@@ -42,9 +42,13 @@ package ly.kite.facebookphotopicker;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.GridView;
 
@@ -206,7 +210,19 @@ public class FacebookPhotoPickerActivity extends Activity implements FacebookAge
   @Override
   public void facOnError( Exception exception )
     {
-    // TODO: Display error dialog
+    Log.e( LOG_TAG, "Facebook error", exception );
+
+    RetryListener  retryListener  = new RetryListener();
+    CancelListener cancelListener = new CancelListener();
+
+    new AlertDialog.Builder( this )
+        .setTitle( R.string.title_facebook_alert_dialog )
+        .setMessage( getString( R.string.message_facebook_alert_dialog, exception.toString() ) )
+        .setPositiveButton( R.string.button_text_retry, retryListener )
+        .setNegativeButton( R.string.button_text_cancel, cancelListener )
+        .setOnCancelListener( cancelListener )
+        .create()
+      .show();
     }
 
 
@@ -272,6 +288,41 @@ public class FacebookPhotoPickerActivity extends Activity implements FacebookAge
 
 
   ////////// Inner Class(es) //////////
+
+  /*****************************************************
+   *
+   * The alert dialog retry button listener.
+   *
+   *****************************************************/
+  private class RetryListener implements Dialog.OnClickListener
+    {
+    @Override
+    public void onClick( DialogInterface dialog, int which )
+      {
+      displayGallery();
+      }
+    }
+
+
+  /*****************************************************
+   *
+   * The alert dialog cancel (button) listener.
+   *
+   *****************************************************/
+  private class CancelListener implements Dialog.OnClickListener, Dialog.OnCancelListener
+    {
+    @Override
+    public void onClick( DialogInterface dialog, int which )
+      {
+      finish();
+      }
+
+    @Override
+    public void onCancel( DialogInterface dialog )
+      {
+      finish();
+      }
+    }
 
 
   }
