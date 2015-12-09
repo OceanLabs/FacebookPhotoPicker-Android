@@ -258,6 +258,18 @@ public class FacebookAgent
 
   /*****************************************************
    *
+   * Clears any next page request, so photos are retrieved
+   * from the start.
+   *
+   *****************************************************/
+  void resetPhotos()
+    {
+    mNextPhotosPageGraphRequest = null;
+    }
+
+
+  /*****************************************************
+   *
    * Loads the next available page of photos.
    *
    *****************************************************/

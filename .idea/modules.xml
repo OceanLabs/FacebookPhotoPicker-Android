@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/FacebookPhotoPicker-Android/FacebookPhotoPicker.iml" filepath="$PROJECT_DIR$/FacebookPhotoPicker-Android/FacebookPhotoPicker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FacebookPhotoPicker/FacebookPhotoPicker.iml" filepath="$PROJECT_DIR$/FacebookPhotoPicker/FacebookPhotoPicker.iml" />
       <module fileurl="file://$PROJECT_DIR$/FacebookPhotoPicker-Android.iml" filepath="$PROJECT_DIR$/FacebookPhotoPicker-Android.iml" />
     </modules>
   </component>

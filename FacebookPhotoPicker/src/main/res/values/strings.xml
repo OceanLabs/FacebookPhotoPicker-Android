@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">@string/title_facebook_photo_picker</string>
-
     <string name="title_facebook_photo_picker">Facebook Photo Picker</string>
+
+    <string name="app_name">@string/title_facebook_photo_picker</string>
 
     <string name="title_facebook_alert_dialog">Facebook Error</string>
     <string name="message_facebook_alert_dialog">There was a problem loading your Facebook photos:\n%1$s</string>

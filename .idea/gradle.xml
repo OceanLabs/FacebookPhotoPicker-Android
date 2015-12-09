@@ -9,7 +9,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/FacebookPhotoPicker-Android" />
+            <option value="$PROJECT_DIR$/FacebookPhotoPicker" />
           </set>
         </option>
       </GradleProjectSettings>

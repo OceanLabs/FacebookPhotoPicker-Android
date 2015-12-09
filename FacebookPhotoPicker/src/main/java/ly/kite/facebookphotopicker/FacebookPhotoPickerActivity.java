@@ -283,7 +283,17 @@ public class FacebookPhotoPickerActivity extends Activity implements FacebookAge
    *****************************************************/
   private void displayGallery()
     {
-    mFacebookAgent.getPhotos( this );
+    if ( mPagingBaseAdaptor != null )
+      {
+      mPagingBaseAdaptor.removeAllItems();
+      }
+
+    if ( mFacebookAgent != null )
+      {
+      mFacebookAgent.resetPhotos();
+
+      mFacebookAgent.getPhotos( this );
+      }
     }
 
 
