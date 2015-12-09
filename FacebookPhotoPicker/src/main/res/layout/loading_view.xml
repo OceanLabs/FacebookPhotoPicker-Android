@@ -1,0 +1,24 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/loading_view_margin_layout"
+    android:orientation="vertical">
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <ProgressBar
+            android:id="@+id/video_item_image"
+            android:layout_gravity="center"
+            android:layout_width="@dimen/loading_view_progress_size"
+            android:layout_height="@dimen/loading_view_progress_size"
+            style="?android:progressBarStyle"
+            android:indeterminate="true"/>
+    </FrameLayout>
+    <TextView
+        android:id="@+id/video_item_label"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/Loading_"/>
+</LinearLayout>

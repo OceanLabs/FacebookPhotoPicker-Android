@@ -1,0 +1,10 @@
+<ly.kite.photopicker.common.PagingGridView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/paging_grid_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:numColumns="3"
+    android:stretchMode="columnWidth"
+    android:verticalSpacing="4dp"
+    android:horizontalSpacing="4dp"
+    android:gravity="center"/>
