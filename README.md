@@ -42,7 +42,7 @@ Step 5. Listen to result in your Fragment by overriding Fragment.onActivityResul
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK && resultCode == FACEBOOKPHOTOPICKERACTIVITY_REQUEST_CODE) {
+        if (resultCode == Activity.RESULT_OK && requestCode == FACEBOOKPHOTOPICKERACTIVITY_REQUEST_CODE) {
             Photo[] photoArray = FacebookPhotoPicker.getResultPhotos(data);
         }
     }
