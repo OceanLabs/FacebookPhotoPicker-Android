@@ -1,27 +1,26 @@
 /*****************************************************
- *
  * Photo.java
- *
- *
+ * <p/>
+ * <p/>
  * Modified MIT License
- *
+ * <p/>
  * Copyright (c) 2010-2015 Kite Tech Ltd. https://www.kite.ly
- *
+ * <p/>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p/>
  * The software MAY ONLY be used with the Kite Tech Ltd platform and MAY NOT be modified
- * to be used with any competitor platforms. This means the software MAY NOT be modified 
+ * to be used with any competitor platforms. This means the software MAY NOT be modified
  * to place orders with any competitors to Kite Tech Ltd, all orders MUST go through the
- * Kite Tech Ltd platform servers. 
- *
+ * Kite Tech Ltd platform servers.
+ * <p/>
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * <p/>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,7 +28,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
  *****************************************************/
 
 ///// Package Declaration /////
@@ -52,149 +50,136 @@ import java.net.URL;
  * This class represents a photo.
  *
  *****************************************************/
-public class Photo implements Parcelable
-  {
-  ////////// Static Constant(s) //////////
+public class Photo implements Parcelable {
+    ////////// Static Constant(s) //////////
 
-  @SuppressWarnings("unused")
-  static private final String LOG_TAG = "Photo";
+    @SuppressWarnings("unused")
+    static private final String LOG_TAG = "Photo";
 
 
-  ////////// Static Variable(s) //////////
+    ////////// Static Variable(s) //////////
 
-  static public final Creator CREATOR = new Creator()
-    {
-    public Photo createFromParcel( Parcel in )
-      {
-      return new Photo( in );
-      }
+    static public final Creator CREATOR = new Creator() {
+        public Photo createFromParcel(Parcel in) {
+            return new Photo(in);
+        }
 
-    public Photo[] newArray( int size )
-      {
-      return new Photo[ size ];
-      }
+        public Photo[] newArray(int size) {
+            return new Photo[size];
+        }
     };
 
 
-  ////////// Member Variable(s) //////////
+    ////////// Member Variable(s) //////////
 
-  private final URL     mThumbnailURL;
-  private final URL     mFullURL;
-
-
-  ////////// Static Initialiser(s) //////////
+    private final URL mThumbnailURL;
+    private final URL mFullURL;
 
 
-  ////////// Static Method(s) //////////
+    ////////// Static Initialiser(s) //////////
 
 
-  ////////// Constructor(s) //////////
+    ////////// Static Method(s) //////////
 
-  public Photo( URL thumbnailURL, URL fullURL )
-    {
-    mThumbnailURL = thumbnailURL;
-    mFullURL      = fullURL;
+
+    ////////// Constructor(s) //////////
+
+    public Photo(URL thumbnailURL, URL fullURL) {
+        mThumbnailURL = thumbnailURL;
+        mFullURL = fullURL;
     }
 
-  public Photo( Parcel in )
-    {
-    mThumbnailURL = (URL)in.readValue( URL.class.getClassLoader() );
-    mFullURL      = (URL)in.readValue( URL.class.getClassLoader() );
-    }
-
-
-  ////////// Parcelable Method(s) //////////
-
-  /*****************************************************
-   *
-   * ...
-   *
-   *****************************************************/
-  @Override
-  public int describeContents()
-    {
-    return 0;
-    }
-
-  @Override
-  public void writeToParcel( Parcel targetParcel, int flags )
-    {
-    targetParcel.writeValue( mThumbnailURL );
-    targetParcel.writeValue( mFullURL );
+    public Photo(Parcel in) {
+        mThumbnailURL = (URL) in.readValue(URL.class.getClassLoader());
+        mFullURL = (URL) in.readValue(URL.class.getClassLoader());
     }
 
 
-  ////////// Method(s) //////////
+    ////////// Parcelable Method(s) //////////
 
-  /*****************************************************
-   *
-   * Returns the URL of the thumbnail image.
-   *
-   *****************************************************/
-  public URL getThumbnailURL()
-    {
-    return ( mThumbnailURL );
+    /*****************************************************
+     *
+     * ...
+     *
+     *****************************************************/
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel targetParcel, int flags) {
+        targetParcel.writeValue(mThumbnailURL);
+        targetParcel.writeValue(mFullURL);
     }
 
 
-  /*****************************************************
-   *
-   * Returns the URL of the full image.
-   *
-   *****************************************************/
-  public URL getFullURL()
-    {
-    return ( mFullURL );
+    ////////// Method(s) //////////
+
+    /*****************************************************
+     *
+     * Returns the URL of the thumbnail image.
+     *
+     *****************************************************/
+    public URL getThumbnailURL() {
+        return (mThumbnailURL);
     }
 
 
-  /*****************************************************
-   *
-   * Returns a hash code for this photo.
-   *
-   *****************************************************/
-  @Override
-  public int hashCode()
-    {
-    int v = 17;
-    v = v * 31 + mThumbnailURL.hashCode();
-    v = v * 31 + mFullURL.hashCode();
-    return v;
+    /*****************************************************
+     *
+     * Returns the URL of the full image.
+     *
+     *****************************************************/
+    public URL getFullURL() {
+        return (mFullURL);
     }
 
 
-  /*****************************************************
-   *
-   * Returns true if this photo equals the other photo.
-   * Note that this does not take into account the ids,
-   * so photos with matching URLs but different ids are
-   * taken to be equal.
-   *
-   *****************************************************/
-  @Override
-  public boolean equals( Object otherObject )
-    {
-    if ( otherObject == null ) return ( false );
-
-    if ( otherObject == this ) return ( true );
-
-    if ( ! ( otherObject instanceof Photo ) )
-      {
-      return ( false );
-      }
-
-    Photo otherPhoto = (Photo)otherObject;
-
-    return ( otherPhoto.mThumbnailURL.equals( mThumbnailURL ) && otherPhoto.mFullURL.equals( mFullURL ) );
+    /*****************************************************
+     *
+     * Returns a hash code for this photo.
+     *
+     *****************************************************/
+    @Override
+    public int hashCode() {
+        int v = 17;
+        v = v * 31 + mThumbnailURL.hashCode();
+        v = v * 31 + mFullURL.hashCode();
+        return v;
     }
 
 
-  ////////// Inner Class(es) //////////
+    /*****************************************************
+     *
+     * Returns true if this photo equals the other photo.
+     * Note that this does not take into account the ids,
+     * so photos with matching URLs but different ids are
+     * taken to be equal.
+     *
+     *****************************************************/
+    @Override
+    public boolean equals(Object otherObject) {
+        if (otherObject == null) return (false);
 
-  /*****************************************************
-   *
-   * ...
-   *
-   *****************************************************/
+        if (otherObject == this) return (true);
 
-  }
+        if (!(otherObject instanceof Photo)) {
+            return (false);
+        }
+
+        Photo otherPhoto = (Photo) otherObject;
+
+        return (otherPhoto.mThumbnailURL.equals(mThumbnailURL) && otherPhoto.mFullURL.equals(mFullURL));
+    }
+
+
+    ////////// Inner Class(es) //////////
+
+    /*****************************************************
+     *
+     * ...
+     *
+     *****************************************************/
+
+}
