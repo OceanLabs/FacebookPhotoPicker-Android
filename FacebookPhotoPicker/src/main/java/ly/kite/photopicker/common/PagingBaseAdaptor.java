@@ -6,37 +6,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public abstract class PagingBaseAdaptor<T> extends BaseAdapter
-  {
+public abstract class PagingBaseAdaptor<T> extends BaseAdapter {
 
-  protected List<T> mItemList;
+    protected List<T> mItemList;
 
-  public PagingBaseAdaptor()
-    {
-    mItemList = new ArrayList<T>();
+    public PagingBaseAdaptor() {
+        mItemList = new ArrayList<T>();
     }
 
-  public PagingBaseAdaptor( List<T> items )
-    {
-    mItemList = items;
+    public PagingBaseAdaptor(List<T> items) {
+        mItemList = items;
     }
 
-  public void addMoreItems( List<T> newItems )
-    {
-    mItemList.addAll( newItems );
+    public void addMoreItems(List<T> newItems) {
+        mItemList.addAll(newItems);
 
-    notifyDataSetChanged();
+        notifyDataSetChanged();
     }
 
-  public void removeAllItems()
-    {
-    mItemList.clear();
+    public void removeAllItems() {
+        mItemList.clear();
 
-    notifyDataSetChanged();
+        notifyDataSetChanged();
     }
 
-  public List<T> getItems()
-    {
-    return mItemList;
+    public List<T> getItems() {
+        return mItemList;
     }
-  }
+}
