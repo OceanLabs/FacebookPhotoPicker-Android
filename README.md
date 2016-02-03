@@ -33,6 +33,16 @@ Step 4. Add Internet permission to your AndroidManifest.xml
 
 Step 4. Start Intent
 
-        startActivity(new Intent(this, FacebookPhotoPickerActivity.class));
+        public static final int FACEBOOKPHOTOPICKERACTIVITY_REQUEST_CODE = 10012;
 
-Step 5.
+        FacebookPhotoPickerActivity.startForResult(myFragment, FACEBOOKPHOTOPICKERACTIVITY_REQUEST_CODE);
+
+Step 5. Listen to result in your Fragment by overriding Fragment.onActivityResult
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK && resultCode == FACEBOOKPHOTOPICKERACTIVITY_REQUEST_CODE) {
+            Photo[] photoArray = FacebookPhotoPicker.getResultPhotos(data);
+        }
+    }
