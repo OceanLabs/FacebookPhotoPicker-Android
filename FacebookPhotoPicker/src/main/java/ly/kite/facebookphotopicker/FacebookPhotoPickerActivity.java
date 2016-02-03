@@ -44,10 +44,10 @@ import java.util.List;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.GridView;
@@ -96,7 +96,7 @@ public class FacebookPhotoPickerActivity extends Activity implements FacebookAge
    * Starts this activity.
    *
    *****************************************************/
-  static public void startForResult( Fragment fragment, int activityRequestCode )
+  static public void startForResult(Fragment fragment, int activityRequestCode )
     {
     Intent intent = new Intent( fragment.getActivity(), FacebookPhotoPickerActivity.class );
 

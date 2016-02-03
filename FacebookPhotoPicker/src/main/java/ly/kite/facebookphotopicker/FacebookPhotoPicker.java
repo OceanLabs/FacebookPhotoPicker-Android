@@ -42,10 +42,10 @@ package ly.kite.facebookphotopicker;
 
 ///// Class Declaration /////
 
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Parcelable;
 
+import android.support.v4.app.Fragment;
 import ly.kite.photopicker.common.Photo;
 
 /*****************************************************
@@ -80,9 +80,9 @@ public class FacebookPhotoPicker
    * Starts the Facebook photo picker.
    *
    *****************************************************/
-  static public void startPhotoPickerForResult( Fragment fragment, int activityRequestCode )
+  static public void startPhotoPickerForResult(Fragment fragment, int activityRequestCode )
     {
-    FacebookPhotoPickerActivity.startForResult( fragment, activityRequestCode );
+    FacebookPhotoPickerActivity.startForResult(fragment, activityRequestCode );
     }
 
 
