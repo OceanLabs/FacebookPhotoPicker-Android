@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="default_thumbnail_image_width">512px</dimen>
+
+</resources>

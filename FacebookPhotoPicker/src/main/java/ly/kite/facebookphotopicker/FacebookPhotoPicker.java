@@ -103,6 +103,17 @@ public class FacebookPhotoPicker
     }
 
 
+  /*****************************************************
+   *
+   * Ends a customer session.
+   *
+   *****************************************************/
+  static public void endCustomerSession()
+    {
+    FacebookAgent.logOut();
+    }
+
+
   ////////// Constructor(s) //////////
 
 

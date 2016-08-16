@@ -50,6 +50,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -83,6 +84,8 @@ public class FacebookAgent
   @SuppressWarnings("unused")
   static private final String  LOG_TAG                        = "FacebookAgent";
 
+  static private final boolean DEBUGGING_ENABLED              = false;
+
   static private final String  PERMISSION_USER_PHOTOS         = "user_photos";
 
   static private final String  GRAPH_PATH_MY_PHOTOS           = "/me/photos";
@@ -108,8 +111,6 @@ public class FacebookAgent
 
   ////////// Static Variable(s) //////////
 
-  static private FacebookAgent sFacebookAgent;
-
 
   ////////// Member Variable(s) //////////
 
@@ -133,12 +134,30 @@ public class FacebookAgent
    *****************************************************/
   static public FacebookAgent getInstance( Activity activity )
     {
-    if ( sFacebookAgent == null )
-      {
-      sFacebookAgent = new FacebookAgent( activity );
-      }
+    // We don't cache the instance, because we don't want to hold
+    // onto the activity. The activity we use always needs to be the
+    // current one, otherwise subsequent re-log-ins can fail.
 
-    return ( sFacebookAgent );
+    return ( new FacebookAgent( activity ) );
+    }
+
+
+  /*****************************************************
+   *
+   * Logs out.
+   *
+   *****************************************************/
+  static void logOut()
+    {
+    if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "--> logOut()" );
+
+    LoginManager.getInstance().logOut();
+
+    if ( DEBUGGING_ENABLED )
+      {
+      Log.d( LOG_TAG, "  Access token = " + AccessToken.getCurrentAccessToken() );
+      Log.d( LOG_TAG, "<-- logOut()" );
+      }
     }
 
 
@@ -166,6 +185,10 @@ public class FacebookAgent
 
 
   ////////// Constructor(s) //////////
+
+  private FacebookAgent( Context context )
+    {
+    }
 
   private FacebookAgent( Activity activity )
     {
@@ -197,7 +220,11 @@ public class FacebookAgent
    *****************************************************/
   private void newAccessToken( AccessToken accessToken )
     {
-    Log.d( LOG_TAG, "newAcceessToken( accessToken ):\n" + stringFrom( accessToken ) );
+    if ( DEBUGGING_ENABLED )
+      {
+      Log.d( LOG_TAG, "--> newAccessToken( accessToken = " + stringFrom( accessToken ) + " )" );
+      Log.d( LOG_TAG, "mPendingRequest = " + mPendingRequest );
+      }
 
     if ( mPendingRequest != null  )
       {
@@ -207,6 +234,10 @@ public class FacebookAgent
 
       pendingRequest.onExecute();
       }
+
+
+    if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "<-- newAccessToken( accessToken )" );
+
     }
 
 
@@ -217,9 +248,13 @@ public class FacebookAgent
    *****************************************************/
   private void executeRequest( ARequest request )
     {
+    if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "--> executeRequest( request = " + request + " )" );
+
     // If we don't have an access token - make a log-in request.
 
     AccessToken accessToken = AccessToken.getCurrentAccessToken();
+
+    if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "accessToken = " + stringFrom( accessToken ) );
 
     if ( accessToken == null || accessToken.getUserId() == null )
       {
@@ -231,10 +266,10 @@ public class FacebookAgent
 
       loginManager.logInWithReadPermissions( mActivity, Arrays.asList( PERMISSION_USER_PHOTOS ) );
 
+      if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "<-- executeRequest( request )" );
+
       return;
       }
-
-    Log.d( LOG_TAG, "Current access token = " + accessToken.getToken() );
 
 
     // If the access token has expired - refresh it
@@ -247,12 +282,16 @@ public class FacebookAgent
 
       AccessToken.refreshCurrentAccessTokenAsync();
 
+      if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "<-- executeRequest( request )" );
+
       return;
       }
 
 
     // We have a valid access token, so execute the request
     request.onExecute();
+
+    if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "<-- executeRequest( request )" );
     }
 
 
@@ -264,6 +303,8 @@ public class FacebookAgent
    *****************************************************/
   void resetPhotos()
     {
+    if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "resetPhotos()" );
+
     mNextPhotosPageGraphRequest = null;
     }
 
@@ -275,6 +316,8 @@ public class FacebookAgent
    *****************************************************/
   void getPhotos( IPhotosCallback photosCallback )
     {
+    if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "getPhotos( photosCallback )" );
+
     PhotosRequest photosRequest = new PhotosRequest( photosCallback );
 
     executeRequest( photosRequest );
@@ -331,6 +374,8 @@ public class FacebookAgent
     @Override
     public void onExecute()
       {
+      if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "--> PhotosRequest.onExecute()" );
+
       // If we already have a next page request ready - execute it now. Otherwise
       // start a brand new request.
 
@@ -343,6 +388,8 @@ public class FacebookAgent
         mNextPhotosPageGraphRequest.executeAsync();
 
         mNextPhotosPageGraphRequest = null;
+
+        if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "<-- PhotosRequest.onExecute()" );
 
         return;
         }
@@ -361,6 +408,8 @@ public class FacebookAgent
               photosGraphRequestCallback );
 
       request.executeAsync();
+
+      if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "<-- PhotosRequest.onExecute()" );
       }
     }
 
@@ -404,7 +453,7 @@ public class FacebookAgent
     @Override
     public void onSuccess( LoginResult loginResult )
       {
-      Log.d( LOG_TAG, "onSuccess( loginResult = " + loginResult.toString() + " )" );
+      if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "onSuccess( loginResult = " + loginResult.toString() + " )" );
 
       newAccessToken( loginResult.getAccessToken() );
       }
@@ -418,7 +467,7 @@ public class FacebookAgent
     @Override
     public void onCancel()
       {
-      Log.d( LOG_TAG, "onCancel()" );
+      if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "onCancel()" );
 
       if ( mPendingRequest != null ) mPendingRequest.onCancel();
       }
@@ -432,7 +481,7 @@ public class FacebookAgent
     @Override
     public void onError( FacebookException facebookException )
       {
-      Log.d( LOG_TAG, "onError( facebookException = " + facebookException + ")", facebookException );
+      if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "onError( facebookException = " + facebookException + ")", facebookException );
 
       if ( mPendingRequest != null ) mPendingRequest.onError( facebookException );
       }
@@ -458,7 +507,7 @@ public class FacebookAgent
     @Override
     public void onCompleted( GraphResponse graphResponse )
       {
-      Log.d( LOG_TAG, "Graph response: " + graphResponse );
+      if ( DEBUGGING_ENABLED ) Log.d( LOG_TAG, "PhotosGraphRequestCallback.onCompleted( graphResponse = " + graphResponse + " )" );
 
 
       // Check for error
@@ -506,6 +555,66 @@ public class FacebookAgent
         {
         Log.d( LOG_TAG, "Response object: " + responseJSONObject.toString() );
 
+        // Returned image data is as follows:
+        //
+        //      {
+        //        "data":
+        //          [
+        //            {
+        //            "id":"127137810981327",
+        //            "link":"https:\/\/www.facebook.com\/photo.php?fbid=127137810981327&set=a.127137917647983.1073741826.100010553266947&type=3",
+        //            "picture":"https:\/\/scontent.xx.fbcdn.net\/v\/t1.0-0\/s130x130\/12189788_127137810981327_132541351271856743_n.jpg?oh=28cc43a422b5a6af600cf69383ead821&oe=57D436FB",
+        //            "images":
+        //              [
+        //                {
+        //                "height":2048,
+        //                "source":"https:\/\/scontent.xx.fbcdn.net\/t31.0-8\/12240189_127137810981327_132541351271856743_o.jpg",
+        //                "width":1536
+        //                },
+        //                {
+        //                "height":1280,
+        //                "source":"https:\/\/scontent.xx.fbcdn.net\/t31.0-8\/q86\/p960x960\/12240189_127137810981327_132541351271856743_o.jpg",
+        //                "width":960
+        //                },
+        //                {
+        //                "height":960,
+        //                "source":"https:\/\/scontent.xx.fbcdn.net\/v\/t1.0-9\/12189788_127137810981327_132541351271856743_n.jpg?oh=70a79bd7db8038ba1bddb6571f44f204&oe=57D20748",
+        //                "width":720
+        //                },
+        //                {
+        //                "height":800,
+        //                "source":"https:\/\/scontent.xx.fbcdn.net\/t31.0-0\/q81\/p600x600\/12240189_127137810981327_132541351271856743_o.jpg",
+        //                "width":600
+        //                },
+        //                {
+        //                "height":640,
+        //                "source":"https:\/\/scontent.xx.fbcdn.net\/v\/t1.0-0\/q81\/p480x480\/12189788_127137810981327_132541351271856743_n.jpg?oh=df73c06e98f6fdf144ed52032b7c284c&oe=57CE9AB1",
+        //                "width":480
+        //                },
+        //                {
+        //                "height":426,
+        //                "source":"https:\/\/scontent.xx.fbcdn.net\/v\/t1.0-0\/p320x320\/12189788_127137810981327_132541351271856743_n.jpg?oh=a93025d1656980ef03778b6e65f8e3ee&oe=57DAEDDE",
+        //                "width":320
+        //                },
+        //                {
+        //                "height":540,
+        //                "source":"https:\/\/scontent.xx.fbcdn.net\/v\/t1.0-0\/p180x540\/12189788_127137810981327_132541351271856743_n.jpg?oh=f727d706ac924e214bdd1e113546acb2&oe=57D86FA8",
+        //                "width":405
+        //                },
+        //                {
+        //                "height":173,
+        //                "source":"https:\/\/scontent.xx.fbcdn.net\/v\/t1.0-0\/p130x130\/12189788_127137810981327_132541351271856743_n.jpg?oh=7e3705aa4673ef25aba315198bd81d7c&oe=57DF914E",
+        //                "width":130
+        //                },
+        //                {
+        //                "height":225,
+        //                "source":"https:\/\/scontent.xx.fbcdn.net\/v\/t1.0-0\/p75x225\/12189788_127137810981327_132541351271856743_n.jpg?oh=fe6e37ebef0d7813a5e0b5f9c16490ce&oe=57DAD07C",
+        //                "width":168
+        //                }
+        //              ]
+        //            },
+        //            ... <next photo> ...
+
         JSONArray dataJSONArray = responseJSONObject.optJSONArray( JSON_NAME_DATA );
 
         if ( dataJSONArray != null )
@@ -518,30 +627,16 @@ public class FacebookAgent
               {
               JSONObject photoJSONObject = dataJSONArray.getJSONObject( photoIndex );
 
-              String    id             = photoJSONObject.getString( JSON_NAME_ID );
-              String    picture        = photoJSONObject.getString( JSON_NAME_PICTURE );
-              JSONArray imageJSONArray = photoJSONObject.getJSONArray( JSON_NAME_IMAGES );
+              Photo photo = photoFromJSON( photoJSONObject );
 
-              // The images are supplied in an array of different formats, so pick the
-              // largest one.
-              String largestImageSource = getLargestImageSource( imageJSONArray );
-
-              Log.d( LOG_TAG, "-- Photo --" );
-              Log.d( LOG_TAG, "Id                   : " + id );
-              Log.d( LOG_TAG, "Picture              : " + picture );
-              Log.d( LOG_TAG, "Largest image source : " + largestImageSource );
-
-              Photo photo = new Photo( new URL( picture), new URL( largestImageSource ) );
-
-              photoArrayList.add( photo );
+              if ( photo != null )
+                {
+                photoArrayList.add( photo );
+                }
               }
             catch ( JSONException je )
               {
               Log.e( LOG_TAG, "Unable to extract photo data from JSON: " + responseJSONObject.toString(), je );
-              }
-            catch ( MalformedURLException mue )
-              {
-              Log.e( LOG_TAG, "Invalid URL in JSON: " + responseJSONObject.toString(), mue );
               }
             }
 
@@ -564,33 +659,87 @@ public class FacebookAgent
 
     /*****************************************************
      *
+     * Returns a photo from the supplied JSON.
+     *
+     *****************************************************/
+    private Photo photoFromJSON( JSONObject photoJSONObject ) throws JSONException
+      {
+      String    id             = photoJSONObject.getString( JSON_NAME_ID );
+      String    picture        = photoJSONObject.getString( JSON_NAME_PICTURE );
+      JSONArray imageJSONArray = photoJSONObject.getJSONArray( JSON_NAME_IMAGES );  // "The different stored representations of the photo. Can vary in number based upon the size of the original photo."
+
+      if ( DEBUGGING_ENABLED )
+        {
+        Log.d( LOG_TAG, "-- Photo --" );
+        Log.d( LOG_TAG, "Id      : " + id );
+        Log.d( LOG_TAG, "Picture : " + picture );  // "Link to the 100px wide representation of this photo"
+        }
+
+
+      try
+        {
+        // Create a new photo, and add the (thumbnail) picture
+        Photo photo = new Photo( picture, 100 );
+
+
+        // Add the remaining images
+
+        int imageCount = imageJSONArray.length();
+
+        for ( int imageIndex = 0; imageIndex < imageCount; imageIndex++ )
+          {
+          JSONObject imageJSONObject = imageJSONArray.getJSONObject( imageIndex );
+
+          String imageSourceURLString = imageJSONObject.getString( JSON_NAME_SOURCE );
+          int    width                = imageJSONObject.optInt( JSON_NAME_WIDTH, Photo.Image.UNKNOWN_DIMENSION );
+          int    height               = imageJSONObject.optInt( JSON_NAME_HEIGHT, Photo.Image.UNKNOWN_DIMENSION );
+
+          if ( imageSourceURLString != null )
+            {
+            photo.addImage( imageSourceURLString, width, height );
+            }
+          }
+
+        return ( photo );
+        }
+      catch ( MalformedURLException mue )
+        {
+        Log.e( LOG_TAG, "Invalid URL in JSON: " + photoJSONObject.toString(), mue );
+        }
+
+      return ( null );
+      }
+
+
+    /*****************************************************
+     *
      * Iterates through the images in a JSON array, and returns
      * the source of the largest one.
      *
      *****************************************************/
-    private String getLargestImageSource( JSONArray imageJSONArray ) throws JSONException
-      {
-      if ( imageJSONArray == null ) return ( null );
-
-      int imageCount = imageJSONArray.length();
-
-      int    largestImageWidth  = 0;
-      String largestImageSource = null;
-
-      for ( int imageIndex = 0; imageIndex < imageCount; imageIndex ++ )
-        {
-        JSONObject imageJSONObject = imageJSONArray.getJSONObject( imageIndex );
-        int        width           = imageJSONObject.getInt( JSON_NAME_WIDTH );
-
-        if ( width > largestImageWidth )
-          {
-          largestImageWidth    = width;
-          largestImageSource = imageJSONObject.getString( JSON_NAME_SOURCE );
-          }
-        }
-
-      return ( largestImageSource );
-      }
+//    private String getLargestImageSource( JSONArray imageJSONArray ) throws JSONException
+//      {
+//      if ( imageJSONArray == null ) return ( null );
+//
+//      int imageCount = imageJSONArray.length();
+//
+//      int    largestImageWidth  = 0;
+//      String largestImageSource = null;
+//
+//      for ( int imageIndex = 0; imageIndex < imageCount; imageIndex ++ )
+//        {
+//        JSONObject imageJSONObject = imageJSONArray.getJSONObject( imageIndex );
+//        int        width           = imageJSONObject.getInt( JSON_NAME_WIDTH );
+//
+//        if ( width > largestImageWidth )
+//          {
+//          largestImageWidth    = width;
+//          largestImageSource = imageJSONObject.getString( JSON_NAME_SOURCE );
+//          }
+//        }
+//
+//      return ( largestImageSource );
+//      }
 
     }
 

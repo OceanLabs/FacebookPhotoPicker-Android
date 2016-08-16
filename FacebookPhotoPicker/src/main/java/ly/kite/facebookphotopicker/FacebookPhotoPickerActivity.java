@@ -93,7 +93,22 @@ public class FacebookPhotoPickerActivity extends Activity implements FacebookAge
 
   /*****************************************************
    *
-   * Starts this activity.
+   * Starts this activity, returning the result to a calling
+   * activity.
+   *
+   *****************************************************/
+  static public void startForResult( Activity activity, int activityRequestCode )
+    {
+    Intent intent = new Intent( activity, FacebookPhotoPickerActivity.class );
+
+    activity.startActivityForResult( intent, activityRequestCode );
+    }
+
+
+  /*****************************************************
+   *
+   * Starts this activity, returning the result to a calling
+   * fragment.
    *
    *****************************************************/
   static public void startForResult( Fragment fragment, int activityRequestCode )
